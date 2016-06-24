@@ -7,8 +7,27 @@ var  gulp         = require('gulp'),
      rename       = require('gulp-rename'),
      notify       = require('gulp-notify'),
      serve        = require('serve-static'),
-     browserSync  = require('browser-sync');
+     browsersync  = require('browser-sync'),
+    connect       = require('connect');
 
+// --SCSS
+gulp.task('styles', function() {
+  gulp.src(
+    [
+      'app/libs/bootstrap/dist/css/bootstrap.min.css',
+      'app/libs/owl-carousel/owl-carousel/owl.carousel.css',
+      'src/scss/variables/_*.scss',
+      'src/scss/base/_*.scss',
+      'src/scss/modules/*/_*.scss'
+    ]
+  )
+    .pipe(concat('style.scss'))
+    .pipe(sass({outputStyle : 'expended'}).on('error', sass.logError))
+    .pipe(autoprefixer({browsers : ['last 10 version']}))
+    .pipe(minifyCss())
+    .pipe(gulp.dest('./app/'))
+    .pipe(notify('Styles done!'))
+});
 
 
 // --Server
@@ -29,3 +48,14 @@ gulp.task('browsersync', function(cb) {
     }
   }, cb);
 });
+
+
+// --Watch
+gulp.task('watch', function() {
+  gulp.watch(['src/scss/*/_*.scss', 'src/scss/modules/*/_*.scss'], ['styles', browsersync.reload]);
+  gulp.watch('index.html', browsersync.reload);
+});
+
+
+// --Default
+gulp.task('default', ['styles', 'server', 'browsersync', 'watch']);
